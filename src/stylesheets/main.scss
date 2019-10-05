@@ -524,7 +524,69 @@ body.alt-theme .login-container {
 
 #tree {
     [data-id="search-icon"], [data-id="search"] {
-        position: absolute;
-        top: 50px;
+        top: 50px !important;
+    }
+
+    .edit-wrapper {
+        opacity: 0.98 !important;
+        width: 50vw !important;
+        min-width: 400px !important;
+        max-width: 800px !important;
+        min-height: 500px !important;
+        max-height: 800px !important;
+        width: 50vw !important;
+        height: 50vh !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        box-shadow: 0px 4px 13px #0004;
+    }
+
+    .edit-view {
+        .edit-photo div:first-child {
+            left: 7px !important;
+            right: unset !important;
+            transform: rotate(180deg) !important;
+        }
+    }
+
+    .edit-fields {
+        height: auto !important;
+
+        .edit-assistant-button-content {
+            display: none;
+        }
+
+        div:nth-child(3) {
+            position: absolute !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+
+            > :not(button) {
+                display: none !important;
+            }
+
+            > button {
+                left: 50%;
+                transform: translate(-50%);
+                width: 140px;
+                height: 140px;
+                opacity: 0;
+            }
+        }
+    }
+
+    .node image {
+        height: auto;
+    }
+
+    [second-link-id] > path {
+        stroke: #0000002b;
+        stroke-dasharray: 4, 4;
+    }
+
+    .bg-ripple-container {
+        overflow: hidden;
     }
 }

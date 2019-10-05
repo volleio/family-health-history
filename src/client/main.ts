@@ -323,10 +323,30 @@ class FamilyHealthHistoryClient {
 
 		this.familyTree = new OrgChart(document.getElementById("tree"), {
 			template: "diva",
-			enableDragDrop: true,
+			enableDragDrop: false,
+			zoom: {
+                speed: 80,
+                smooth: 8
+			},
+			scaleMin: 0.25,
+			scaleMax: 2,
+			scaleInitial: 0.7,
+			orientation: OrgChart.orientation.bottom,
+			layout: OrgChart.tree,
+			nodeMouseClick: OrgChart.action.edit,
+			menu: {
+				svg: { text: "Export SVG" },
+				csv: { text: "Export CSV" }
+			},
+			nodeMenu:{
+            	add: {text:"Add Parent"},
+            	addSibling: {text:"Add Sibling"},
+            	addChild: {text:"Add Child"},
+            	remove: {text:"Remove"}
+            },
 			nodeBinding: {
-				field_0: "name",
-				field_1: "title",
+				field_0: "Name",
+				field_1: "Relation",
 				img_0: "img"
 			},
 			tags: {
@@ -337,11 +357,15 @@ class FamilyHealthHistoryClient {
 				f5: familyGroupTag
 			},
 			nodes: [
-				{ id: 1, tags: ["f1"], name: "King George VI", img: "https://balkangraph.com/js/img/f1.png" },
-				{ id: 2, tags: ["f1"], name: "Queen Elizabeth", title: "The Queen Mother", img: "https://balkangraph.com/js/img/f2.png" },
-				{ id: 3, tags: ["f2"], pid: 2, name: "Prince Philip", title: "Duke of Edinburgh", img: "https://balkangraph.com/js/img/f3.png" },
-				{ id: 4, tags: ["f2"], pid: 2, name: "Queen Elizabeth II", img: "https://balkangraph.com/js/img/f5.png" },
-				{ id: 5, pid: 2, name: "Princess Margaret", img: "https://balkangraph.com/js/img/f6.png" },
+				{ id: 9, pid: 3, Name: "Leonard Smith", Relation: "Paternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/7/74/Leonard_Smith.png/revision/latest?cb=20140421044137" },
+				{ id: 8, pid: 3, Name: "Joyce Smith", Relation: "Paternal Grandmother", img: "https://rickandmortyapi.com/api/character/avatar/186.jpeg" },
+				{ id: 7, pid: 4, Name: "Rick Sanchez", Relation: "Maternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest?cb=20160923150728" },
+				{ id: 6, pid: 4, Name: "Mrs. Sanchez", Relation: "Maternal Grandmother", img: "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png" },
+				{ id: 5, pid: 3, tags: ["assistant"], Name: "Steve Smith", Relation: "\"Uncle\"", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/5/50/UncleSteve.png/revision/latest?cb=20150823180126" },
+				{ id: 4, pid: 1, Name: "Beth Smith", Relation: "Mom", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/b/be/Screenshot_2016-11-20_at_6.54.33_PM.png/revision/latest?cb=20161121033552" },
+				{ id: 3, pid: 1, Name: "Jerry Smith", Relation: "Dad", img: "https://pbs.twimg.com/profile_images/738078769920020481/xpW4r-Tr_400x400.jpg" },
+				{ id: 2, pid: 1, tags: ["assistant"], Name: "Summer Smith", Relation: "Sister", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/ad/Summer_is_cool.jpeg/revision/latest?cb=20160919183158" },
+				{ id: 1, Name: "Morty Smith", Relation: "You", img: "https://media3.giphy.com/media/EE8AyDbOjlfOw/source.gif" },
 			]
 		});
 
