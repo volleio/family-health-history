@@ -33,3 +33,11 @@ $ npm run debug
 ```
 
 Your app should now be running on [localhost:5000](http://localhost:5000/).
+
+
+
+
+
+
+Credits: 
+Icon - https://thenounproject.com/ojog.silviu, https://thenounproject.com/chattapat4699 

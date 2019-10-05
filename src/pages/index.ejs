@@ -6,8 +6,6 @@
 	<script>
 		var theme = "<%= theme ? theme : '' %>";
 	</script>
-	<script defer src="/js/typingdna.js" type="text/javascript"></script>
-	<script defer src="/js/lang.js" type="text/javascript"></script>
 	<script defer src="/js/main.js" type="text/javascript"></script>
 </head>
 
@@ -32,12 +30,6 @@
 				<div class="login-help-extra"></div>
 			</div>
 			<div class="login-auth-badge">
-				<svg class="auth-update-progress-ring progress-ring" width="30" height="30">
-					<circle class="progress-ring__circle" stroke="#4796F3" stroke-width="2" fill="transparent" r="13.5" cx="15" cy="15"/>
-				</svg>
-				<svg class="auth-match-progress-ring progress-ring" width="30" height="30">
-					<circle class="progress-ring__circle" stroke="#46AB2B" stroke-width="3" fill="transparent" r="13.5" cx="15" cy="15"/>
-				</svg>
 				<div class="login-auth-badge__check"></div>
 			</div>
 			<div class="main-menu">
@@ -46,28 +38,8 @@
 				</div>
 			</div>
 		</div>
-		<div class="notes-container">
-			<template id="note-input-template">
-				<div class="note-container">
-					<textarea cols="30" rows="10" class="note-input"></textarea>
-					<div class="note-saving-indicator">…</div>
-					<div class="note-saved-indicator"></div>
-					<div class="note-save-failed-indicator"></div>
-				</div>
-			</template>
-			<div class="end-of-notes" style="visibility: hidden">
-				<div class="end-of-notes__msg"></div>
-			</div>
-			<div class="notes-spinner spinner">
-				<div class="spinner__line"></div>
-				<div class="spinner__line"></div>
-			</div>
+		<div class="app-container">
 		</div>
-	</div>
-	<div class="mobile-warning warning-container">
-		<button class="warning-close"></button>
-		<img class="mobile-warning__image" src="/images/MobileFrowny.svg"/>
-		<div class="mobile-warning__body"></div>
 	</div>
 </body>
 </html>

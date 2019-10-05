@@ -40,7 +40,7 @@
 		"mongodb": "^3.2.7",
 		"node-fetch": "^2.6.0",
 		"redis": "^2.8.0",
-		"serve-favicon": "^2.5.0",
+		"serve-favicon": "^2.5.0"
 	},
 	"repository": {
 		"type": "git",
