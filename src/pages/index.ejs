@@ -7,6 +7,10 @@
 		var theme = "<%= theme ? theme : '' %>";
 	</script>
 	<script defer src="/js/main.js" type="text/javascript"></script>
+	<script src="https://balkangraph.com/js/latest/OrgChart.js"></script>
+	<link href='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/17.0.2/autocomplete-lhc.min.css' rel="stylesheet">
+	<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js'></script>
+	<script src='https://clinicaltables.nlm.nih.gov/autocomplete-lhc-versions/17.0.2/autocomplete-lhc.min.js'></script>
 </head>
 
 <body class="<%= theme ? theme : '' %>" >
@@ -15,6 +19,7 @@
 		<div class="spinner__line"></div>
 	</div>
 	<div id="main-container" class="main-container">
+		<div class="logo"></div>
 		<div class="header">
 		</div>
 		<div class="login-container">

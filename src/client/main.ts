@@ -39,7 +39,7 @@ class FamilyHealthHistoryClient {
 
 				if (this.loginInput.value.length <= 8) 
 				{
-					this.UpdateLoginHelp(false, false, HelpStates.EnterEmail, "Please enter your email",	"");
+					this.UpdateLoginHelp(false, false, HelpStates.EnterEmail, "Please enter your email to log in",	"");
 					const loginHelpCurrent = this.isLoginHelpPrimary ? this.loginHelpText1 : this.loginHelpText2;
 					loginHelpCurrent.style.opacity = (1 - this.loginInput.value.length / 12).toString();
 				} 
@@ -64,7 +64,7 @@ class FamilyHealthHistoryClient {
 		this.loginInput.focus();
 
 		// Prompt the user to enter their email
-		this.UpdateLoginHelp(false, false, HelpStates.Login, "Please enter your email",	"");
+		this.UpdateLoginHelp(false, false, HelpStates.Login, "Please enter your email to log in to log in",	"");
 
 		this.loginHelpText1.addEventListener('mouseover', () => this.OnLoginHelpMouseOver());
 		this.loginHelpText1.addEventListener('mouseout', () => this.OnLoginHelpMouseOut());
@@ -145,7 +145,7 @@ class FamilyHealthHistoryClient {
 			this.loginInput.removeAttribute('disabled');
 			this.loginInput.focus();
 			this.loginInput.value = '';
-			this.UpdateLoginHelp(false, false, HelpStates.EnterEmail, "Please enter your email");
+			this.UpdateLoginHelp(false, false, HelpStates.EnterEmail, "Please enter your email to log in");
 		});
 
 		userNotFoundButtonContainer.appendChild(createAccountButton);
