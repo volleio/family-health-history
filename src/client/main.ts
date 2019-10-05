@@ -1,3 +1,5 @@
+declare var OrgChart: any;
+
 class FamilyHealthHistoryClient {
 	private mainContainer: HTMLElement;
 
@@ -18,6 +20,9 @@ class FamilyHealthHistoryClient {
 	
 	private loginId = '';
 
+	// Family tree
+	private familyTree: any;
+
 	constructor() 
 	{
 		this.Initialize();
@@ -29,14 +34,6 @@ class FamilyHealthHistoryClient {
 		{
 			requestAnimationFrame(() => 
 			{
-				if (this.currentHelpTextState === HelpStates.CreateAccount)
-				{
-					if (this.loginInput.value === this.loginId)
-						this.CreateAccount();
-					
-					return;
-				}
-
 				if (this.loginInput.value.length <= 8) 
 				{
 					this.UpdateLoginHelp(false, false, HelpStates.EnterEmail, "Please enter your email to log in",	"");
@@ -64,7 +61,7 @@ class FamilyHealthHistoryClient {
 		this.loginInput.focus();
 
 		// Prompt the user to enter their email
-		this.UpdateLoginHelp(false, false, HelpStates.Login, "Please enter your email to log in to log in",	"");
+		this.UpdateLoginHelp(false, false, HelpStates.Login, "Please enter your email to log in",	"");
 
 		this.loginHelpText1.addEventListener('mouseover', () => this.OnLoginHelpMouseOver());
 		this.loginHelpText1.addEventListener('mouseout', () => this.OnLoginHelpMouseOut());
@@ -135,6 +132,7 @@ class FamilyHealthHistoryClient {
 		createAccountButton.addEventListener('click', (evt) => 
 		{
 			this.loginId = loginId;
+			this.CreateAccount();
 		});
 		
 		const cancelButton = document.createElement('button');
@@ -311,6 +309,42 @@ class FamilyHealthHistoryClient {
 			location.reload();
 		});
 		
+		this.SetUpFamilyTree();
+	}
+
+	private SetUpFamilyTree(): void
+	{
+		
+		const familyGroupTag = {
+			group: true,
+			template: "group_grey",
+			groupState: OrgChart.EXPAND
+		};
+
+		this.familyTree = new OrgChart(document.getElementById("tree"), {
+			template: "diva",
+			enableDragDrop: true,
+			nodeBinding: {
+				field_0: "name",
+				field_1: "title",
+				img_0: "img"
+			},
+			tags: {
+				f1: familyGroupTag,
+				f2: familyGroupTag,
+				f3: familyGroupTag,
+				f4: familyGroupTag,
+				f5: familyGroupTag
+			},
+			nodes: [
+				{ id: 1, tags: ["f1"], name: "King George VI", img: "https://balkangraph.com/js/img/f1.png" },
+				{ id: 2, tags: ["f1"], name: "Queen Elizabeth", title: "The Queen Mother", img: "https://balkangraph.com/js/img/f2.png" },
+				{ id: 3, tags: ["f2"], pid: 2, name: "Prince Philip", title: "Duke of Edinburgh", img: "https://balkangraph.com/js/img/f3.png" },
+				{ id: 4, tags: ["f2"], pid: 2, name: "Queen Elizabeth II", img: "https://balkangraph.com/js/img/f5.png" },
+				{ id: 5, pid: 2, name: "Princess Margaret", img: "https://balkangraph.com/js/img/f6.png" },
+			]
+		});
+
 	}
 
 }

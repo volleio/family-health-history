@@ -142,7 +142,7 @@ class FamilyHealthHistoryServer
 			return res.status(500).send();
 		}
 		
-		if (!userData || !userData.id_patterns || userData.id_patterns.length < 2)
+		if (!userData)
 		{
 			req.session.key = loginInput;
 			req.session.loginQuality = 1;

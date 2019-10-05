@@ -6,8 +6,8 @@
     --accent-txt-color: #FFF;
     --primary-font-family: 'Lato', sans-serif;
     --secondary-font-family: 'Vollkorn', sans-serif;
-    --accent-bg-color: #FAB;
-    --accent-bg-color-transparent: #FAB8;
+    --accent-bg-color: #d78fef;
+    --accent-bg-color-transparent: #d78fef08;
 }
 
 * {
@@ -512,4 +512,19 @@ body.alt-theme .login-container {
     font-size: 38px;
     color: #8819AE;
     font-family: Acme, Arial, Helvetica, sans-serif;
+}
+
+.app-container {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    position: absolute;
+}
+
+#tree {
+    [data-id="search-icon"], [data-id="search"] {
+        position: absolute;
+        top: 50px;
+    }
 }
