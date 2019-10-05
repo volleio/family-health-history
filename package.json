@@ -1,0 +1,69 @@
+{
+	"name": "biometric-diary",
+	"version": "0.0.0",
+	"description": "A note taking app secured with biometric typing authentication.",
+	"engines": {
+		"node": "8.9.1"
+	},
+	"main": "index.js",
+	"scripts": {
+		"start": "node build/index.js",
+		"watch": "nodemon build/index.js",
+		"debug": "nodemon --inspect build/index.js",
+		"build": "npm run compile-ts-server && npm run compile-ts-client && npm run compile-sass && npm run copy-assets",
+		"compile-ts-server": "tsc -p tsconfig.server.json",
+		"compile-ts-client": "tsc -p tsconfig.client.json",
+		"compile-sass": "node-sass-chokidar src/stylesheets/ -o build/stylesheets/",
+		"copy-assets": "cpx \"src/**/*.{js,ejs,svg,ico,env}\" ./build",
+		"dev": "concurrently \"npm:compile-ts-server-w\" \"npm:compile-ts-client-w\" \"npm:compile-sass-w\" \"npm:copy-assets-w\"",
+		"compile-ts-server-w": "tsc -w -p tsconfig.server.json",
+		"compile-ts-client-w": "tsc -w -p tsconfig.client.json",
+		"compile-sass-w": "npm run compile-sass && node-sass-chokidar -r -w src/stylesheets/ -o build/stylesheets/ --usePolling --polling-interval 500",
+		"copy-assets-w": "cpx \"src/**/*.{js,ejs,svg,ico,env}\" ./build -w",
+		"heroku-postbuild": "npm run build"
+	},
+	"dependencies": {
+		"@types/body-parser": "^1.17.0",
+		"@types/connect-redis": "0.0.10",
+		"@types/express-session": "^1.15.13",
+		"@types/mongodb": "^3.1.28",
+		"@types/node-fetch": "^2.3.7",
+		"body-parser": "^1.19.0",
+		"connect-redis": "^3.4.1",
+		"cpx": "^1.5.0",
+		"dotenv": "^8.0.0",
+		"dtsmake": "0.0.10",
+		"ejs": "^2.6.2",
+		"express": "^4.17.1",
+		"express-rate-limit": "^4.0.4",
+		"express-session": "^1.16.2",
+		"mongodb": "^3.2.7",
+		"node-fetch": "^2.6.0",
+		"redis": "^2.8.0",
+		"serve-favicon": "^2.5.0",
+		"tslint-config-airbnb": "^5.11.1",
+		"typingdnaclient": "^1.0.3"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/volleio/Biometric-Diary"
+	},
+	"keywords": [
+		"node",
+		"heroku",
+		"express"
+	],
+	"license": "MIT",
+	"devDependencies": {
+		"@types/dotenv": "^6.1.1",
+		"@types/express": "^4.17.0",
+		"@types/node": "^12.6.2",
+		"@types/serve-favicon": "^2.2.30",
+		"concurrently": "^4.1.1",
+		"node-sass-chokidar": "^1.3.5",
+		"nodemon": "^1.19.1",
+		"tslint": "^5.18.0",
+		"tslint-config-prettier": "^1.18.0",
+		"typescript": "^3.5.3"
+	}
+}
