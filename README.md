@@ -1,10 +1,6 @@
-# Biometric Diary
+# Family Health History
 
-A note taking app secured with biometric typing authentication.
-
-![logo](/src/images/BiometricDiaryIcon.svg)
-
-**View it live at [biometric-diary.herokuapp.com](https://biometric-diary.herokuapp.com/)!**
+A web app for recording your family's health history and sharing the information with your family and healthcare professionals.
 
 #
 ## Running Locally
@@ -12,8 +8,8 @@ A note taking app secured with biometric typing authentication.
 Make sure you have [Node.js](http://nodejs.org/) installed.
 
 ```sh
-$ git clone git@github.com:volleio/Biometric-Diary.git 
-$ cd Biometric-Diary
+$ git clone git@github.com:volleio/family-health-history
+$ cd family-health-history
 $ npm install
 $ npm run build
 $ npm run start

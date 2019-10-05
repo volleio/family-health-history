@@ -1,8 +1,8 @@
 {
-	"name": "Biometric Diary",
-	"description": "A note taking app secured with biometric typing authentication.",
-	"repository": "https://github.com/volleio/Biometric-Diary.git",
-	"logo": "https://raw.githubusercontent.com/volleio/Biometric-Diary/master/images/BiometricDiaryIcon.svg",
+	"name": "Family Health History",
+	"description": "An app for recording your family's health history and sharing it with healthcare professionals.",
+	"repository": "https://github.com/volleio/family-health-history.git",
+	"logo": "https://raw.githubusercontent.com/volleio/family-health-history/master/images/Icon.svg",
 	"keywords": ["node", "express", "heroku"],
 	"image": "heroku/nodejs"
 }
