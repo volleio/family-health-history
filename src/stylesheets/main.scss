@@ -593,7 +593,11 @@ body.alt-theme .login-container {
             display: none;
         }
 
-        div:nth-child(3) {
+        > div:first-child {
+            display: none;
+        } 
+
+        > div:nth-child(4) {
             position: absolute !important;
             top: 0 !important;
             width: 100% !important;
@@ -638,7 +642,11 @@ body.alt-theme .login-container {
 
     [second-link-id] > path {
         stroke: #0000002b;
-        stroke-dasharray: 4, 4;
+        // stroke-dasharray: 4, 4;
+    }
+    
+    .node.emptyroot + .link {
+        opacity: 0;
     }
 
     .bg-ripple-container {

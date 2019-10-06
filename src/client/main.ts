@@ -340,28 +340,43 @@ class FamilyHealthHistoryClient {
 			groupState: OrgChart.EXPAND
 		};
 
+		OrgChart.templates.empty = Object.assign({}, OrgChart.templates.base);
+		OrgChart.templates.empty.size = [0, 0];
+		OrgChart.templates.empty.node = '';
+		OrgChart.templates.empty.plus = '';
+		OrgChart.templates.empty.minus = '';
+		OrgChart.templates.empty.img_0 = '';
+
+		OrgChart.templates.root = Object.assign({}, OrgChart.templates.diva);
+		OrgChart.templates.root.link = '';
+
+		OrgChart.templates.emptyroot = Object.assign({}, OrgChart.templates.empty);
+		OrgChart.templates.emptyroot.link = '';
+
 		this.familyTree = new OrgChart(document.getElementById("tree"), {
 			template: "diva",
 			enableDragDrop: false,
 			zoom: {
-                speed: 80,
-                smooth: 8
+                speed: 20,
+                smooth: 2
 			},
 			scaleMin: 0.25,
 			scaleMax: 2,
 			scaleInitial: 0.7,
 			orientation: OrgChart.orientation.bottom,
-			layout: OrgChart.tree,
+			// orientation: OrgChart.orientation.top,
+			layout: OrgChart.normal,
 			toolbar: {
-                layout: true,
+                layout: false,
                 zoom: true,
-                fit: true,
+                fit: false,
                 expandAll: false
             },
 			nodeMouseClick: OrgChart.action.edit,
 			menu: {
 				svg: { text: "Export SVG" },
-				csv: { text: "Export CSV" }
+				csv: { text: "Export CSV" },
+				pdf: { text: "Export PDF" },
 			},
 			nodeMenu:{
             	add: {text:"Add Parent"},
@@ -371,21 +386,21 @@ class FamilyHealthHistoryClient {
 					onClick: (nodeId) =>
 					{
 						const node = this.familyTree.get(nodeId);
-						const nextId = this.GetNextNodeId();
-						this.familyTree.addNode({ id: nextId, pid: node.id, tags: ["assistant"] });
-					}
-				},
-            	addChild: {
-					text:"Add Child",
-					icon: () => '<svg width="24px" height="24px"   viewBox="0 0 922 922"><path fill="#7A7A7A" d="M922,453V81c0-11.046-8.954-20-20-20H410c-11.045,0-20,8.954-20,20v149h318c24.812,0,45,20.187,45,45v198h149 C913.046,473.001,922,464.046,922,453z" /><path fill="#7A7A7A" d="M557,667.001h151c11.046,0,20-8.954,20-20v-174v-198c0-11.046-8.954-20-20-20H390H216c-11.045,0-20,8.954-20,20v149h194 h122c24.812,0,45,20.187,45,45v4V667.001z" /><path fill="#7A7A7A" d="M0,469v372c0,11.046,8.955,20,20,20h492c11.046,0,20-8.954,20-20V692v-12.501V667V473v-4c0-11.046-8.954-20-20-20H390H196 h-12.5H171H20C8.955,449,0,457.955,0,469z" /></svg>',
-					onClick: (nodeId) =>
-					{
-						const node = this.familyTree.get(nodeId);
-						const nextId = this.GetNextNodeId();
+						const parents = this.familyTree.config.nodes.filter((n) => n.pid === node.id);
 
-						
+						const nextId = this.GetNextNodeId();
+						const newNode: any = { id: nextId,  Name: "", Relation: "", img: "", "Medical Conditions": "" };
+						if (node.pid)
+							newNode.pid = 0;
 
-						this.familyTree.addNode({ id: nextId, pid: node.id, tags: ["assistant"] });
+						parents.forEach(parent => {
+							if (!parent.spids)
+								parent.spids = [];
+							
+							parent.spids.push(newNode.id);
+						});
+
+						this.familyTree.addNode(newNode);
 					}
 				},
             	remove: {text:"Remove"}
@@ -401,19 +416,45 @@ class FamilyHealthHistoryClient {
 				f2: familyGroupTag,
 				f3: familyGroupTag,
 				f4: familyGroupTag,
-				f5: familyGroupTag
+				f5: familyGroupTag,
+				empty: { template: 'empty' },
+				emptyroot: { template: 'emptyroot' },
+				root: { template: 'root' },
 			},
+			// nodes: [
+			// 	{ id: 9, pid: 3, Name: "Leonard Smith", Relation: "Paternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/7/74/Leonard_Smith.png/revision/latest?cb=20140421044137", "Medical Conditions": "" },
+			// 	{ id: 8, pid: 3, Name: "Joyce Smith", Relation: "Paternal Grandmother", img: "https://rickandmortyapi.com/api/character/avatar/186.jpeg", "Medical Conditions": "" },
+			// 	{ id: 7, pid: 4, Name: "Rick Sanchez", Relation: "Maternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest?cb=20160923150728", "Medical Conditions": "" },
+			// 	{ id: 6, pid: 4, Name: "Mrs. Sanchez", Relation: "Maternal Grandmother", img: "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png", "Medical Conditions": "" },
+			// 	{ id: 5, pid: 3, tags: ["assistant"], Name: "Steve Smith", Relation: "\"Uncle\"", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/5/50/UncleSteve.png/revision/latest?cb=20150823180126", "Medical Conditions": "" },
+			// 	{ id: 4, pid: 1, Name: "Beth Smith", Relation: "Mom", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/b/be/Screenshot_2016-11-20_at_6.54.33_PM.png/revision/latest?cb=20161121033552", "Medical Conditions": "" },
+			// 	{ id: 3, pid: 1, Name: "Jerry Smith", Relation: "Dad", img: "https://pbs.twimg.com/profile_images/738078769920020481/xpW4r-Tr_400x400.jpg", "Medical Conditions": "" },
+			// 	{ id: 2, pid: 1, tags: ["assistant"], Name: "Summer Smith", Relation: "Sister", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/ad/Summer_is_cool.jpeg/revision/latest?cb=20160919183158", "Medical Conditions": "" },
+			// 	{ id: 1, Name: "Morty Smith", Relation: "You", img: "https://i.imgur.com/9NGko96.gif", "Medical Conditions": "" },
+			// ]
 			nodes: [
-				{ id: 9, pid: 3, Name: "Leonard Smith", Relation: "Paternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/7/74/Leonard_Smith.png/revision/latest?cb=20140421044137", "Medical Conditions": "" },
-				{ id: 8, pid: 3, Name: "Joyce Smith", Relation: "Paternal Grandmother", img: "https://rickandmortyapi.com/api/character/avatar/186.jpeg", "Medical Conditions": "" },
+				{ id: 9, pid: 3, spids: [5], Name: "Leonard Smith", Relation: "Paternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/7/74/Leonard_Smith.png/revision/latest?cb=20140421044137", "Medical Conditions": "" },
+				{ id: 8, pid: 3, spids: [5], Name: "Joyce Smith", Relation: "Paternal Grandmother", img: "https://rickandmortyapi.com/api/character/avatar/186.jpeg", "Medical Conditions": "" },
 				{ id: 7, pid: 4, Name: "Rick Sanchez", Relation: "Maternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest?cb=20160923150728", "Medical Conditions": "" },
-				{ id: 6, pid: 4, Name: "Mrs. Sanchez", Relation: "Maternal Grandmother", img: "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png", "Medical Conditions": "" },
-				{ id: 5, pid: 3, tags: ["assistant"], Name: "Steve Smith", Relation: "\"Uncle\"", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/5/50/UncleSteve.png/revision/latest?cb=20150823180126", "Medical Conditions": "" },
-				{ id: 4, pid: 1, Name: "Beth Smith", Relation: "Mom", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/b/be/Screenshot_2016-11-20_at_6.54.33_PM.png/revision/latest?cb=20161121033552", "Medical Conditions": "" },
-				{ id: 3, pid: 1, Name: "Jerry Smith", Relation: "Dad", img: "https://pbs.twimg.com/profile_images/738078769920020481/xpW4r-Tr_400x400.jpg", "Medical Conditions": "" },
-				{ id: 2, pid: 1, tags: ["assistant"], Name: "Summer Smith", Relation: "Sister", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/ad/Summer_is_cool.jpeg/revision/latest?cb=20160919183158", "Medical Conditions": "" },
+				{ id: 6, pid: 4, Name: "Mrs. Sanchez", Relation: "Maternal Grandmother", img: "/images/avatar.png", "Medical Conditions": "" },
+				{ id: 5, pid: 0, Name: "Steve Smith", Relation: "\"Uncle\"", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/5/50/UncleSteve.png/revision/latest?cb=20150823180126", "Medical Conditions": "" },
+				{ id: 4, pid: 1, spids: [2], Name: "Beth Smith", Relation: "Mom", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/b/be/Screenshot_2016-11-20_at_6.54.33_PM.png/revision/latest?cb=20161121033552", "Medical Conditions": "" },
+				{ id: 3, pid: 1, spids: [2], Name: "Jerry Smith", Relation: "Dad", img: "https://pbs.twimg.com/profile_images/738078769920020481/xpW4r-Tr_400x400.jpg", "Medical Conditions": "" },
+				{ id: 2, Name: "Summer Smith", Relation: "Sister", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/ad/Summer_is_cool.jpeg/revision/latest?cb=20160919183158", "Medical Conditions": "" },
 				{ id: 1, Name: "Morty Smith", Relation: "You", img: "https://i.imgur.com/9NGko96.gif", "Medical Conditions": "" },
+				{ id: 0, "tags": ['emptyroot'] },
 			]
+			// nodes: [
+			// 	{ id: 9, Name: "Leonard Smith", Relation: "Paternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/7/74/Leonard_Smith.png/revision/latest?cb=20140421044137", "Medical Conditions": "" },
+			// 	{ id: 8, Name: "Joyce Smith", Relation: "Paternal Grandmother", img: "https://rickandmortyapi.com/api/character/avatar/186.jpeg", "Medical Conditions": "" },
+			// 	{ id: 7, Name: "Rick Sanchez", Relation: "Maternal Grandfather", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest?cb=20160923150728", "Medical Conditions": "" },
+			// 	{ id: 6, Name: "Mrs. Sanchez", Relation: "Maternal Grandmother", img: "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png", "Medical Conditions": "" },
+			// 	{ id: 5, pid: 8, Name: "Steve Smith", Relation: "\"Uncle\"", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/5/50/UncleSteve.png/revision/latest?cb=20150823180126", "Medical Conditions": "" },
+			// 	{ id: 4, pid: 6, spids: [7], Name: "Beth Smith", Relation: "Mom", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/b/be/Screenshot_2016-11-20_at_6.54.33_PM.png/revision/latest?cb=20161121033552", "Medical Conditions": "" },
+			// 	{ id: 3, pid: 8, spids: [9], Name: "Jerry Smith", Relation: "Dad", img: "https://pbs.twimg.com/profile_images/738078769920020481/xpW4r-Tr_400x400.jpg", "Medical Conditions": "" },
+			// 	{ id: 2, pid: 4, tags: ["assistant"], Name: "Summer Smith", Relation: "Sister", img: "https://vignette.wikia.nocookie.net/rickandmorty/images/a/ad/Summer_is_cool.jpeg/revision/latest?cb=20160919183158", "Medical Conditions": "" },
+			// 	{ id: 1, pid: 3, Name: "Morty Smith", Relation: "You", img: "https://i.imgur.com/9NGko96.gif", "Medical Conditions": "" },
+			// ]
 		});
 
 		this.familyTree.on('click', (sender, node) =>
