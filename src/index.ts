@@ -169,6 +169,42 @@ class FamilyHealthHistoryServer
 		// TODO: get rid of this
 		// Cache user's data in session so that we don't have to hit the db on later requests
 		req.session.userData = userData;
+
+
+		// Get data from other people who've approved you
+		if (userData.family_nodes)
+		{
+			for (let i = 0; i < userData.family_nodes.length; i++) 
+			{
+				let node = userData.family_nodes[i];
+				if (node.Email && node.Email.toLowerCase() != loginInput.toLowerCase())
+				{
+					try
+					{
+						const familyData = await this.loginDataDb.findOne({ "_id": node.Email.toLowerCase() });
+						if (familyData.approved_family.some((el) => el === loginInput.toLowerCase()))
+						{
+							const selfData = familyData.family_nodes.find(theirNode => theirNode.id === 1);
+							if (selfData && selfData["Medical Conditions"])
+							{
+								const conditions = JSON.parse(selfData["Medical Conditions"]);
+								if (conditions.length > 0)
+								{
+									const publicConditions = conditions.filter(condition => !condition.locked)
+									if (publicConditions && publicConditions.length > 0)
+										node["Medical Conditions"] = JSON.stringify(publicConditions);
+								}
+							}
+						}
+					}
+					catch (err)
+					{
+						// Just don't sync the data
+					}
+				}
+			}
+		}
+
 		
 		return res.send({ 
 			authenticationStatus: AuthenticationStatus.success,
@@ -222,10 +258,10 @@ class FamilyHealthHistoryServer
 			if (request._id.toLowerCase() === req.session.key.toLowerCase())
 				return false;
 
-			if (req.session.userData.approved_family && req.session.userData.approved_family.some((el: string) => el.toLowerCase() === request._id))
+			if (req.session.userData && req.session.userData.approved_family && req.session.userData.approved_family.some((el: string) => el.toLowerCase() === request._id))
 				return false;
 				
-			if (req.session.userData.disapproved_family && req.session.userData.disapproved_family.some((el: string) => el.toLowerCase() === request._id))
+			if (req.session.userData && req.session.userData.disapproved_family && req.session.userData.disapproved_family.some((el: string) => el.toLowerCase() === request._id))
 				return false;
 
 			return true;

@@ -494,7 +494,7 @@ class FamilyHealthHistoryClient {
 					const conditions = JSON.parse(sender.get(node.id)["Medical Conditions"]);
 					if (conditions && conditions.length > 0 && conditions.some((el: IMedicalCondition) => !el.locked))
 					{
-						let html = `<div class="condition-list" onwheel="this.stopImmediatePropagation();"><div class="paper"><ul>`
+						let html = `<div class="condition-list" onwheel="event.stopImmediatePropagation();"><div class="paper"><ul>`
 						conditions.forEach((el: IMedicalCondition) => {
 							if (!el.locked)
 							{
@@ -573,8 +573,8 @@ class FamilyHealthHistoryClient {
 						name: info.consumer_name,
 						icd10Code: info.icd10cm[0].code,
 						icd10Text: info.icd10cm[0].text,
-						link: info.info_link_data[0][0],
-						linkText: info.info_link_data[0][1],
+						link: info.info_link_data ? info.info_link_data[0][0] : "",
+						linkText: info.info_link_data ? info.info_link_data[0][1] : "",
 						locked: false
 					});
 
