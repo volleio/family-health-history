@@ -470,19 +470,17 @@ class FamilyHealthHistoryClient {
 					if (!sender.get(node.id)["Medical Conditions"])
 						return "";
 
-					const conditions = sender.get(node.id)["Medical Conditions"];
-					console.log(conditions);
-
-					if (conditions.length > 0 && conditions.some((el: IMedicalCondition) => !el.locked))
+					const conditions = JSON.parse(sender.get(node.id)["Medical Conditions"]);
+					if (conditions && conditions.length > 0 && conditions.some((el: IMedicalCondition) => !el.locked))
 					{
-						let html = `<div class="condition-list"><ul>`
-						conditions.array.forEach((el: IMedicalCondition) => {
+						let html = `<div class="condition-list"><div class="paper"><ul>`
+						conditions.forEach((el: IMedicalCondition) => {
 							if (!el.locked)
 							{
 								html += `<li>${el.icd10Code} <i>${el.icd10Text}</i></li>`
 							}
 						});
-						html += `</ul></div>`
+						html += `</ul></div></div>`
 						return html;
 					}
 					return "";
@@ -539,7 +537,7 @@ class FamilyHealthHistoryClient {
 				}, (name, locked) =>
 				{
 					let newMedicalConditions = JSON.parse(node["Medical Conditions"]) as IMedicalCondition[];
-					newMedicalConditions.find(val => val.name === name).locked = true;
+					newMedicalConditions.find(val => val.name === name).locked = locked;
 					node["Medical Conditions"] = JSON.stringify(newMedicalConditions);
 					medicalConditionsInput.value = node["Medical Conditions"];
 				});
@@ -573,7 +571,7 @@ class FamilyHealthHistoryClient {
 					}, (name, locked) =>
 					{
 						let newMedicalConditions = JSON.parse(node["Medical Conditions"]) as IMedicalCondition[];
-						newMedicalConditions.find(val => val.name === name).locked = true;
+						newMedicalConditions.find(val => val.name === name).locked = locked;
 						node["Medical Conditions"] = JSON.stringify(newMedicalConditions);
 						medicalConditionsInput.value = node["Medical Conditions"];
 					});

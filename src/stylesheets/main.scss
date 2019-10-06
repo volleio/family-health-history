@@ -718,9 +718,30 @@ body.alt-theme .login-container {
         height: 100px;
         border: 1px solid;
         font-family: Courier, monospace;
+        
+        overflow: auto;
+
+        &::-webkit-scrollbar {
+            background-color: white;
+        }
+    }
+
+    .paper {
         background-color: white;
-        background: repeating-linear-gradient(white, white 25px, #9198e5 26px, #9198e5 27px);
-        background-position-y: 34px;
-        overflow: scroll;
+        background: repeating-linear-gradient(white, white 14px, #9198e5 15px, #9198e5 16px);
+        background-position-y: 6px;
+        width: 100%;
+        min-height: 100%;
+
+        ul {
+            margin: 0px;
+            padding: 5px;   
+            padding-left: 24px;
+            font-size: 13px;
+
+            li {
+                margin-bottom: 3px;
+            }
+        }
     }
 }
