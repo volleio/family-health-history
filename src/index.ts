@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as querystring from 'querystring';
 import * as redis from 'redis';
 import * as favicon from 'serve-favicon';
+import { request } from 'http';
 
 class FamilyHealthHistoryServer
 {
@@ -116,6 +117,7 @@ class FamilyHealthHistoryServer
 		this.app.post('/login', async (req, res) => this.OnLoginReq(req, res));
 		this.app.post('/create-account', async (req, res) => this.OnCreateAccountReq(req, res));
 		this.app.post('/save-tree', async (req, res) => this.OnSaveTreeReq(req, res));
+		this.app.post('/family-request-response', async (req, res) => this.OnFamilyRequestResponseReq(req, res));
 		this.app.post('/logout', async (req, res) => this.OnLogoutReq(req, res));
 	}
 
@@ -146,12 +148,24 @@ class FamilyHealthHistoryServer
 		if (!userData)
 		{
 			req.session.key = loginInput;
-			req.session.loginQuality = 1;
 			return res.send({ authenticationStatus: AuthenticationStatus.userNotFound });
 		}
 		
 		req.session.key = loginInput;
 		
+		// Check if any other users have added you
+		let familyRequests;
+		try 
+		{
+			familyRequests = await this.GetFamilyRequests(req);
+		}
+		catch (err)
+		{
+			console.error('Error attempting to find family reqests in db in login call:');
+			console.error(err);
+			return res.status(500).send();
+		}
+
 		// TODO: get rid of this
 		// Cache user's data in session so that we don't have to hit the db on later requests
 		req.session.userData = userData;
@@ -159,6 +173,7 @@ class FamilyHealthHistoryServer
 		return res.send({ 
 			authenticationStatus: AuthenticationStatus.success,
 			family_nodes: userData.family_nodes,
+			familyRequests: familyRequests
 		});
 	}
 
@@ -181,7 +196,40 @@ class FamilyHealthHistoryServer
 			return res.status(500).send({ authenticationStatus: AuthenticationStatus.error });
 		}
 
-		return res.send({ authenticationStatus: AuthenticationStatus.success });
+		// Check if any other users have added you
+		let familyRequests;
+		try 
+		{
+			familyRequests = await this.GetFamilyRequests(req);
+		}
+		catch (err)
+		{
+			console.error('Error attempting to find family reqests in db in login call:');
+			console.error(err);
+			return res.status(500).send();
+		}
+
+		return res.send({ authenticationStatus: AuthenticationStatus.success, familyRequests: familyRequests });
+	}
+
+	private async GetFamilyRequests(req: express.Request): Promise<any[]>
+	{
+		const familyRequestsCursor = await this.loginDataDb.find({ "family_nodes.Email": req.session.key.toLowerCase() }).project({"_id": 1});
+		const familyRequests = await familyRequestsCursor.toArray();
+
+		return familyRequests.filter((request) => 
+		{
+			if (request._id.toLowerCase() === req.session.key.toLowerCase())
+				return false;
+
+			if (req.session.userData.approved_family && req.session.userData.approved_family.some((el: string) => el.toLowerCase() === request._id))
+				return false;
+				
+			if (req.session.userData.disapproved_family && req.session.userData.disapproved_family.some((el: string) => el.toLowerCase() === request._id))
+				return false;
+
+			return true;
+		});
 	}
 
 	private async OnSaveTreeReq(req: express.Request, res: express.Response): Promise<express.Response>
@@ -205,6 +253,33 @@ class FamilyHealthHistoryServer
 		}
 
 		return res.send();
+	}
+
+	private async OnFamilyRequestResponseReq(req: express.Request, res: express.Response): Promise<express.Response>
+	{
+		if (!req.session)
+			return res.status(500).send(); // Is redis running?
+
+			try 
+			{
+				await this.loginDataDb.updateOne({ 
+					_id: req.session.key.toLowerCase(),
+				}, { 
+					$push: 
+					{ 
+						approved_family: { $each: req.body.approved }, 
+						disapproved_family: { $each: req.body.disapproved }
+					}
+				});
+			}
+			catch (err)
+			{
+				console.error('Error attempting to save family request approvals:');
+				console.error(err);
+				return res.status(500).send();
+			}
+		
+		return res.send();		
 	}
 
 	private async OnLogoutReq(req: express.Request, res: express.Response): Promise<express.Response>

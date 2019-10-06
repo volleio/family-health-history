@@ -1,3 +1,5 @@
+import { stringify } from "querystring";
+
 declare var OrgChart: any;
 declare var Def: any;
 
@@ -108,8 +110,7 @@ class FamilyHealthHistoryClient {
 		switch (loginResult.authenticationStatus)
 		{
 		case AuthenticationStatus.success:
-
-			this.OnLoginSuccess(loginResult.family_nodes);
+			this.OnLoginSuccess(loginValue, loginResult.family_nodes, loginResult.familyRequests);
 			break;
 
 		case AuthenticationStatus.userNotFound:
@@ -191,7 +192,7 @@ class FamilyHealthHistoryClient {
 		switch (createAccountResult.authenticationStatus)
 		{
 		case AuthenticationStatus.success:
-			this.OnLoginSuccess();
+			this.OnLoginSuccess(loginValue, [], createAccountResult.familyRequests);
 			break;
 
 		case AuthenticationStatus.failure:
@@ -288,20 +289,21 @@ class FamilyHealthHistoryClient {
 		this.loginHelpExtra.style.opacity = '0';
 	}
 
-	private OnLoginSuccess(familyTreeNodes = []): void
+	private OnLoginSuccess(loginId: string, familyTreeNodes = [], familyRequests: any): void
 	{
+		this.loginId = loginId;
 		this.UpdateLoginHelp(false, false, null, '');
 		this.loginHelp.style.display = 'none';
 		this.loginButton.style.display = 'none';
 		this.loginContainer.classList.add('login-container--logged-in');
 		this.loginInput.classList.add('login-input--logged-in');
-		document.querySelector(".logo.hands").style.opacity = "1";
+		(document.querySelector(".logo.hands") as HTMLElement).style.opacity = "1";
 
 		window.setTimeout(() =>
 		{
 			document.querySelector(".logo.tree").classList.add("logged-in");
 			document.querySelector(".logo.hands").classList.add("logged-in");
-			document.querySelector(".logo.hands").style.opacity = "";
+			(document.querySelector(".logo.hands") as HTMLElement).style.opacity = "";
 	}, 1000);
 		
 		this.loginAuthBadge.style.display = 'block';
@@ -331,6 +333,30 @@ class FamilyHealthHistoryClient {
 		});
 		
 		this.SetUpFamilyTree(familyTreeNodes);
+
+		if (familyRequests && familyRequests.length > 0)
+		{
+			let approvedReqs = [];
+			let disapprovedReqs = [];
+			familyRequests.forEach(request => {
+				if ((request._id as string).toLowerCase() != this.loginId.toLowerCase())
+				{
+					if (window.confirm(`${request._id} has requested your medical information, would you like to share it with them?`))
+						approvedReqs.push(request._id);
+					else
+						disapprovedReqs.push(request._id);
+				}
+			});
+
+			fetch('/family-request-response', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					approved: approvedReqs,
+					disapproved: disapprovedReqs,
+				}),
+			});
+		}
 	}
 
 	private SetUpFamilyTree(familyTreeNodes: any[]): void
@@ -342,6 +368,9 @@ class FamilyHealthHistoryClient {
 			groupState: OrgChart.EXPAND
 		};
 
+		OrgChart.templates.diva2 = Object.assign({}, OrgChart.templates.diva);
+		OrgChart.templates.diva2.html = '<foreignobject class="node" x="0" y="176" width="200" height="100">{val}</foreignobject>';
+
 		OrgChart.templates.empty = Object.assign({}, OrgChart.templates.base);
 		OrgChart.templates.empty.size = [0, 0];
 		OrgChart.templates.empty.node = '';
@@ -349,14 +378,15 @@ class FamilyHealthHistoryClient {
 		OrgChart.templates.empty.minus = '';
 		OrgChart.templates.empty.img_0 = '';
 
-		OrgChart.templates.root = Object.assign({}, OrgChart.templates.diva);
+		OrgChart.templates.root = Object.assign({}, OrgChart.templates.diva2);
 		OrgChart.templates.root.link = '';
 
 		OrgChart.templates.emptyroot = Object.assign({}, OrgChart.templates.empty);
 		OrgChart.templates.emptyroot.link = '';
 
+
 		this.familyTree = new OrgChart(document.getElementById("tree"), {
-			template: "diva",
+			template: "diva2",
 			enableDragDrop: false,
 			zoom: {
                 speed: 20,
@@ -387,8 +417,16 @@ class FamilyHealthHistoryClient {
 					onClick: (nodeId) =>
 					{
 						const nextId = this.GetNextNodeId();
-						const newNode: any = { id: nextId, pid: nodeId, spids: "", Name: "", Relation: "", img: "/images/avatar.png", "Medical Conditions": "" };
-						this.familyTree.addNode(newNode);
+						const newNode: any = { id: nextId, pid: nodeId, spids: "", Name: "", Relation: "", img: "/images/avatar.png", "Medical Conditions": "", "Email": "" };
+						const currentTree = JSON.stringify(this.familyTree.config.nodes);
+						try
+						{
+							this.familyTree.addNode(newNode);
+						}
+						catch (error)
+						{
+							this.familyTree.config.nodes = JSON.parse(currentTree);
+						}
 					}
 				},
             	addSibling: {
@@ -400,7 +438,7 @@ class FamilyHealthHistoryClient {
 						const parents = this.familyTree.config.nodes.filter((n) => n.pid === node.id);
 
 						const nextId = this.GetNextNodeId();
-						const newNode: any = { id: nextId, pid: "", spids: "", Name: "", Relation: "", img: "/images/avatar.png", "Medical Conditions": "" };
+						const newNode: any = { id: nextId, pid: "", spids: "", Name: "", Relation: "", img: "/images/avatar.png", "Medical Conditions": "", "Email": "" };
 						// if (node.pid)
 						// 	newNode.pid = 0;
 
@@ -411,7 +449,15 @@ class FamilyHealthHistoryClient {
 							parent.spids.push(newNode.id);
 						});
 
-						this.familyTree.addNode(newNode);
+						const currentTree = JSON.stringify(this.familyTree.config.nodes);
+						try
+						{
+							this.familyTree.addNode(newNode);
+						}
+						catch (error)
+						{
+							this.familyTree.config.nodes = JSON.parse(currentTree);
+						}
 					}
 				},
             	remove: {text:"Remove"}
@@ -419,7 +465,28 @@ class FamilyHealthHistoryClient {
 			nodeBinding: {
 				field_0: "Name",
 				field_1: "Relation",
-				field_2: "Medical Conditions",
+				html: (sender, node) => 
+				{
+					if (!sender.get(node.id)["Medical Conditions"])
+						return "";
+
+					const conditions = sender.get(node.id)["Medical Conditions"];
+					console.log(conditions);
+
+					if (conditions.length > 0 && conditions.some((el: IMedicalCondition) => !el.locked))
+					{
+						let html = `<div class="condition-list"><ul>`
+						conditions.array.forEach((el: IMedicalCondition) => {
+							if (!el.locked)
+							{
+								html += `<li>${el.icd10Code} <i>${el.icd10Text}</i></li>`
+							}
+						});
+						html += `</ul></div>`
+						return html;
+					}
+					return "";
+				},
 				img_0: "img"
 			},
 			tags: {
@@ -433,7 +500,7 @@ class FamilyHealthHistoryClient {
 				root: { template: 'root' },
 			},
 			nodes: familyTreeNodes.length > 0 ? familyTreeNodes : [
-				{ id: 1, pid: "", spids: "", Name: "", Relation: "You", img: "/images/avatar.png", "Medical Conditions": "" },
+				{ id: 1, pid: "", spids: "", Name: "", Relation: "You", img: "/images/avatar.png", "Medical Conditions": "", "Email": this.loginId },
 				{ id: 0, "tags": ['emptyroot'] }
 			],
 		});
@@ -464,10 +531,16 @@ class FamilyHealthHistoryClient {
 
 				const medicalConditions = JSON.parse(node["Medical Conditions"]) as IMedicalCondition[];
 
-				this.UpdateMedicalConditionsUI(medicalConditions, medicalConditionsContainer, (index) =>
+				this.UpdateMedicalConditionsUI(medicalConditions, medicalConditionsContainer, (name) =>
 				{
-					medicalConditions.splice(index, 1);
-					node["Medical Conditions"] = JSON.stringify(medicalConditions);
+					let newMedicalConditions = (JSON.parse(node["Medical Conditions"]) as IMedicalCondition[]).filter((val) => val.name != name);
+					node["Medical Conditions"] = JSON.stringify(newMedicalConditions);
+					medicalConditionsInput.value = node["Medical Conditions"];
+				}, (name, locked) =>
+				{
+					let newMedicalConditions = JSON.parse(node["Medical Conditions"]) as IMedicalCondition[];
+					newMedicalConditions.find(val => val.name === name).locked = true;
+					node["Medical Conditions"] = JSON.stringify(newMedicalConditions);
 					medicalConditionsInput.value = node["Medical Conditions"];
 				});
 
@@ -486,15 +559,22 @@ class FamilyHealthHistoryClient {
 						icd10Text: info.icd10cm[0].text,
 						link: info.info_link_data[0][0],
 						linkText: info.info_link_data[0][1],
+						locked: false
 					});
 
 					node["Medical Conditions"] = JSON.stringify(medicalConditions);
 					medicalConditionsInput.value = node["Medical Conditions"];
 
-					this.UpdateMedicalConditionsUI(medicalConditions, medicalConditionsContainer, (index) =>
+					this.UpdateMedicalConditionsUI(medicalConditions, medicalConditionsContainer, (name) =>
 					{
-						medicalConditions.splice(index, 1);
-						node["Medical Conditions"] = JSON.stringify(medicalConditions);
+						let newMedicalConditions = (JSON.parse(node["Medical Conditions"]) as IMedicalCondition[]).filter((val) => val.name != name);
+						node["Medical Conditions"] = JSON.stringify(newMedicalConditions);
+						medicalConditionsInput.value = node["Medical Conditions"];
+					}, (name, locked) =>
+					{
+						let newMedicalConditions = JSON.parse(node["Medical Conditions"]) as IMedicalCondition[];
+						newMedicalConditions.find(val => val.name === name).locked = true;
+						node["Medical Conditions"] = JSON.stringify(newMedicalConditions);
 						medicalConditionsInput.value = node["Medical Conditions"];
 					});
 				});
@@ -513,7 +593,7 @@ class FamilyHealthHistoryClient {
 		window.setTimeout(() =>	document.getElementById("tree").style.opacity = "1", 2000);
 	}
 
-	private UpdateMedicalConditionsUI(medicalConditions: IMedicalCondition[], medicalConditionsContainer: HTMLElement, onDelete: (index: number) => void)
+	private UpdateMedicalConditionsUI(medicalConditions: IMedicalCondition[], medicalConditionsContainer: HTMLElement, onDelete: (name: string) => void, onLock: (name: string, locked: boolean) => void)
 	{
 		medicalConditionsContainer.innerHTML = "";
 		medicalConditions.forEach((obj, index) => {
@@ -523,11 +603,26 @@ class FamilyHealthHistoryClient {
 			<strong>${obj.name}</strong><i>${obj.icd10Code}: ${obj.icd10Text}</i>
 			<br/>
 			<a href="${obj.link}" target="_blank">nlm.nih.gov: ${obj.linkText}</a><div class="delete-btn">×</div>
+			<div class="lock-btn"></div>
 			`
 			medicalConditionsContainer.appendChild(conditionContainer);
 			conditionContainer.querySelector(".delete-btn").addEventListener("click", () => {
 				conditionContainer.remove();
-				onDelete(index);
+				onDelete(obj.name);
+			});
+
+			const lockBtn = conditionContainer.querySelector(".lock-btn");
+			lockBtn.addEventListener("click", () => {
+				if (lockBtn.classList.contains("locked"))
+				{
+					lockBtn.classList.remove("locked");
+					onLock(obj.name, false);
+				}
+				else
+				{
+					lockBtn.classList.add("locked");
+					onLock(obj.name, true);
+				}
 			});
 		});
 	}
@@ -563,6 +658,7 @@ interface IMedicalCondition {
 	icd10Text: string,
 	link: string,
 	linkText: string,
+	locked: boolean
 }
 
 enum HelpStates {
