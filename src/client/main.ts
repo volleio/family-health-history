@@ -369,7 +369,7 @@ class FamilyHealthHistoryClient {
 		};
 
 		OrgChart.templates.diva2 = Object.assign({}, OrgChart.templates.diva);
-		OrgChart.templates.diva2.html = '<foreignobject class="node" x="0" y="176" width="200" height="100">{val}</foreignobject>';
+		OrgChart.templates.diva2.html = '<foreignobject class="node" x="0" y="176" width="1" height="1" style="overflow: visible;">{val}</foreignobject>';
 
 		OrgChart.templates.empty = Object.assign({}, OrgChart.templates.base);
 		OrgChart.templates.empty.size = [0, 0];
@@ -384,6 +384,26 @@ class FamilyHealthHistoryClient {
 		OrgChart.templates.emptyroot = Object.assign({}, OrgChart.templates.empty);
 		OrgChart.templates.emptyroot.link = '';
 
+		const defaultNodes = !this.loginId.toLowerCase().startsWith("morty") 
+		? 
+		[
+			{ id: 1, pid: "", spids: "", Name: "", Relation: "You", img: "/images/avatar.png", "Medical Conditions": "", "Email": this.loginId },
+		]
+		:
+		[
+			{"id":9,"pid":3,"spids":[5],"Name":"Leonard Smith","Relation":"Paternal Grandfather","img":"https://vignette.wikia.nocookie.net/rickandmorty/images/7/74/Leonard_Smith.png/revision/latest?cb=20140421044137","Medical Conditions":"","Email":""},
+			{"id":8,"pid":3,"spids":[5],"Name":"Joyce Smith","Relation":"Paternal Grandmother","img":"https://rickandmortyapi.com/api/character/avatar/186.jpeg","Medical Conditions":"","Email":""},
+			{"id":7,"pid":4,"Name":"Rick Sanchez","Relation":"Maternal Grandfather","img":"https://vignette.wikia.nocookie.net/rickandmorty/images/a/a6/Rick_Sanchez.png/revision/latest?cb=20160923150728","Medical Conditions":"","Email":""},
+			{"id":6,"pid":4,"Name":"Mrs. Sanchez","Relation":"Maternal Grandmother","img":"/images/avatar.png","Medical Conditions":"","Email":""},
+			{"id":5,"pid":0,"Name":"Steve Smith","Relation":"\"Uncle\"","img":"https://vignette.wikia.nocookie.net/rickandmorty/images/5/50/UncleSteve.png/revision/latest?cb=20150823180126","Medical Conditions":"","Email":""},
+			{"id":4,"pid":1,"spids":[2],"Name":"Beth Smith","Relation":"Mom","img":"https://vignette.wikia.nocookie.net/rickandmorty/images/b/be/Screenshot_2016-11-20_at_6.54.33_PM.png/revision/latest?cb=20161121033552","Medical Conditions":"","Email":""},
+			{"id":3,"pid":1,"spids":[2],"Name":"Jerry Smith","Relation":"Dad","img":"https://pbs.twimg.com/profile_images/738078769920020481/xpW4r-Tr_400x400.jpg","Medical Conditions":"","Email":""},
+			{"id":2,"Name":"Summer Smith","Relation":"Sister","img":"https://vignette.wikia.nocookie.net/rickandmorty/images/a/ad/Summer_is_cool.jpeg/revision/latest?cb=20160919183158","Medical Conditions":"","Email":""},
+			{"id":1,"Name":"Morty Smith","Relation":"You","img":"https://i.imgur.com/9NGko96.gif","Medical Conditions":"","Email":"morty@optonline.net"},
+			{"id":0,"tags":["emptyroot"]}
+		];
+
+		
 
 		this.familyTree = new OrgChart(document.getElementById("tree"), {
 			template: "diva2",
@@ -395,6 +415,7 @@ class FamilyHealthHistoryClient {
 			scaleMin: 0.25,
 			scaleMax: 2,
 			scaleInitial: 0.7,
+			levelSeparation: 200,
 			orientation: OrgChart.orientation.bottom,
 			// orientation: OrgChart.orientation.top,
 			layout: OrgChart.normal,
@@ -429,37 +450,37 @@ class FamilyHealthHistoryClient {
 						}
 					}
 				},
-            	addSibling: {
-					text:"Add Sibling",
-					icon: () => '<svg width="24px" height="24px"   viewBox="0 0 922 922"><path fill="#7A7A7A" d="M922,453V81c0-11.046-8.954-20-20-20H410c-11.045,0-20,8.954-20,20v149h318c24.812,0,45,20.187,45,45v198h149 C913.046,473.001,922,464.046,922,453z" /><path fill="#7A7A7A" d="M557,667.001h151c11.046,0,20-8.954,20-20v-174v-198c0-11.046-8.954-20-20-20H390H216c-11.045,0-20,8.954-20,20v149h194 h122c24.812,0,45,20.187,45,45v4V667.001z" /><path fill="#7A7A7A" d="M0,469v372c0,11.046,8.955,20,20,20h492c11.046,0,20-8.954,20-20V692v-12.501V667V473v-4c0-11.046-8.954-20-20-20H390H196 h-12.5H171H20C8.955,449,0,457.955,0,469z" /></svg>',
-					onClick: (nodeId) =>
-					{
-						const node = this.familyTree.get(nodeId);
-						const parents = this.familyTree.config.nodes.filter((n) => n.pid === node.id);
+            	// addSibling: {
+				// 	text:"Add Sibling",
+				// 	icon: () => '<svg width="24px" height="24px"   viewBox="0 0 922 922"><path fill="#7A7A7A" d="M922,453V81c0-11.046-8.954-20-20-20H410c-11.045,0-20,8.954-20,20v149h318c24.812,0,45,20.187,45,45v198h149 C913.046,473.001,922,464.046,922,453z" /><path fill="#7A7A7A" d="M557,667.001h151c11.046,0,20-8.954,20-20v-174v-198c0-11.046-8.954-20-20-20H390H216c-11.045,0-20,8.954-20,20v149h194 h122c24.812,0,45,20.187,45,45v4V667.001z" /><path fill="#7A7A7A" d="M0,469v372c0,11.046,8.955,20,20,20h492c11.046,0,20-8.954,20-20V692v-12.501V667V473v-4c0-11.046-8.954-20-20-20H390H196 h-12.5H171H20C8.955,449,0,457.955,0,469z" /></svg>',
+				// 	onClick: (nodeId) =>
+				// 	{
+				// 		const node = this.familyTree.get(nodeId);
+				// 		const parents = this.familyTree.config.nodes.filter((n) => n.pid === node.id);
 
-						const nextId = this.GetNextNodeId();
-						const newNode: any = { id: nextId, pid: "", spids: "", Name: "", Relation: "", img: "/images/avatar.png", "Medical Conditions": "", "Email": "" };
-						// if (node.pid)
-						// 	newNode.pid = 0;
+				// 		const nextId = this.GetNextNodeId();
+				// 		const newNode: any = { id: nextId, pid: "", spids: "", Name: "", Relation: "", img: "/images/avatar.png", "Medical Conditions": "", "Email": "" };
+				// 		// if (node.pid)
+				// 		// 	newNode.pid = 0;
 
-						parents.forEach(parent => {
-							if (!parent.spids)
-								parent.spids = [];
+				// 		parents.forEach(parent => {
+				// 			if (!parent.spids)
+				// 				parent.spids = [];
 							
-							parent.spids.push(newNode.id);
-						});
+				// 			parent.spids.push(newNode.id);
+				// 		});
 
-						const currentTree = JSON.stringify(this.familyTree.config.nodes);
-						try
-						{
-							this.familyTree.addNode(newNode);
-						}
-						catch (error)
-						{
-							this.familyTree.config.nodes = JSON.parse(currentTree);
-						}
-					}
-				},
+				// 		const currentTree = JSON.stringify(this.familyTree.config.nodes);
+				// 		try
+				// 		{
+				// 			this.familyTree.addNode(newNode);
+				// 		}
+				// 		catch (error)
+				// 		{
+				// 			this.familyTree.config.nodes = JSON.parse(currentTree);
+				// 		}
+				// 	}
+				// },
             	remove: {text:"Remove"}
             },
 			nodeBinding: {
@@ -473,7 +494,7 @@ class FamilyHealthHistoryClient {
 					const conditions = JSON.parse(sender.get(node.id)["Medical Conditions"]);
 					if (conditions && conditions.length > 0 && conditions.some((el: IMedicalCondition) => !el.locked))
 					{
-						let html = `<div class="condition-list"><div class="paper"><ul>`
+						let html = `<div class="condition-list" onwheel="this.stopImmediatePropagation();"><div class="paper"><ul>`
 						conditions.forEach((el: IMedicalCondition) => {
 							if (!el.locked)
 							{
@@ -497,10 +518,7 @@ class FamilyHealthHistoryClient {
 				emptyroot: { template: 'emptyroot' },
 				root: { template: 'root' },
 			},
-			nodes: familyTreeNodes.length > 0 ? familyTreeNodes : [
-				{ id: 1, pid: "", spids: "", Name: "", Relation: "You", img: "/images/avatar.png", "Medical Conditions": "", "Email": this.loginId },
-				{ id: 0, "tags": ['emptyroot'] }
-			],
+			nodes: familyTreeNodes.length > 0 ? familyTreeNodes : defaultNodes,
 		});
 
 		this.familyTree.on('click', (sender, node) =>
@@ -560,6 +578,7 @@ class FamilyHealthHistoryClient {
 						locked: false
 					});
 
+					this.familyTree.addNodeTag(node.id);
 					node["Medical Conditions"] = JSON.stringify(medicalConditions);
 					medicalConditionsInput.value = node["Medical Conditions"];
 
@@ -588,7 +607,7 @@ class FamilyHealthHistoryClient {
 			console.log(inputHtmlElement);
         });  
 
-		window.setTimeout(() =>	document.getElementById("tree").style.opacity = "1", 2000);
+		window.setTimeout(() =>	document.getElementById("tree").style.opacity = "1", 1500);
 	}
 
 	private UpdateMedicalConditionsUI(medicalConditions: IMedicalCondition[], medicalConditionsContainer: HTMLElement, onDelete: (name: string) => void, onLock: (name: string, locked: boolean) => void)
@@ -601,7 +620,7 @@ class FamilyHealthHistoryClient {
 			<strong>${obj.name}</strong><i>${obj.icd10Code}: ${obj.icd10Text}</i>
 			<br/>
 			<a href="${obj.link}" target="_blank">nlm.nih.gov: ${obj.linkText}</a><div class="delete-btn">×</div>
-			<div class="lock-btn"></div>
+			<div class="lock-btn ${obj.locked ? "locked" : ""}"></div>
 			`
 			medicalConditionsContainer.appendChild(conditionContainer);
 			conditionContainer.querySelector(".delete-btn").addEventListener("click", () => {
