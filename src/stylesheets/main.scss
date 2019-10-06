@@ -489,17 +489,39 @@ body.alt-theme .login-container {
 }
 
 .logo {
-    background-image: url('/images/Icon.svg');
+    &.hands {
+        background-image: url('/images/Hands.svg');
+        opacity: 0;
 
-    width: 150px;
-    height: 150px;
+        &.logged-in {
+            width: 100vw;
+            height: 80vh;
+            opacity: 0.2;
+            filter: blur(25px);
+        }
+    }
+    &.tree {
+        background-image: url('/images/Tree.svg');
+
+        &.logged-in {
+            width: 100vw;
+            height: 80vh;
+            opacity: 0.2;
+            filter: blur(25px);
+        }
+    }
+
+    width: 250px;
+    height: 250px;
     position: absolute;
     top: 80px;
     left: 50%;
     transform: translate(-50%);
-
-    background-size: 150px 150px;
-    background-position: center;
+    background-size: contain;
+    background-position: center top;
+    transition: opacity 0.2s ease-in-out, width 0.4s ease-in-out, height 0.4s ease-in-out, filter 2s ease-out;
+    background-repeat: no-repeat;
+    filter: blur(0px);
 }
 
 @import url('https://fonts.googleapis.com/css?family=Acme&display=swap');
@@ -523,7 +545,14 @@ body.alt-theme .login-container {
 }
 
 #tree {
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+
     [data-id="search-icon"], [data-id="search"] {
+        top: 50px !important;
+    }
+
+    [control-export-menu] {
         top: 50px !important;
     }
 
@@ -540,13 +569,20 @@ body.alt-theme .login-container {
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
         box-shadow: 0px 4px 13px #0004;
+        overflow: auto;
     }
 
     .edit-view {
-        .edit-photo div:first-child {
-            left: 7px !important;
-            right: unset !important;
-            transform: rotate(180deg) !important;
+        .edit-photo div:first-child svg {
+            display: none;
+        }
+        .edit-photo div:first-child::before {
+            content: "Save";
+            color: white;
+            font-size: 20px;
+            position: absolute;
+            right: 0%;
+            margin-right: 10px;
         }
     }
 
@@ -575,6 +611,25 @@ body.alt-theme .login-container {
                 opacity: 0;
             }
         }
+
+        > div:last-child {
+            margin: 24px 14px !important;
+        }
+
+        .delete-btn {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            border-radius: 12px;
+            background-color: red;
+            color: white;
+            position: absolute;
+            right: -14px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+            line-height: 13px;
+        }
     }
 
     .node image {
@@ -588,5 +643,42 @@ body.alt-theme .login-container {
 
     .bg-ripple-container {
         overflow: hidden;
+    }
+
+    [fill="#039BE5"] {
+        fill: #8819AE;
+    }
+
+    [stroke="#039BE5"] {
+        stroke: #8819AE;
+    }
+
+    #condition {
+        padding-right: 0;
+        margin-top: 6px;
+        position: relative;
+    }
+
+    .condition-container {
+        margin: 13px 24px 13px 4px;
+        color: grey;
+        position: relative;
+
+        strong {
+            color: maroon;
+            font-size: 18px;
+            margin-right: 14px;
+        }    
+    }
+
+    .condition-search {
+        padding: 2px 4px;
+        margin-top: 6px;
+        width: calc(100% - 10px);
+        border: 2px solid rgb(215, 215, 215);
+        border-radius: 3px;
+        font-size: 18px;
+        color: gray;
+        background-position: center right 8px;
     }
 }
