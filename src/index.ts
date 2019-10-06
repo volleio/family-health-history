@@ -93,7 +93,7 @@ class FamilyHealthHistoryServer
 
 		// set up mongodb before starting this.app.listening
 		const mongodbClient = mongodb.MongoClient;
-		mongodbClient.connect(FamilyHealthHistoryServer.MONGODB_URI, { useNewUrlParser: true }, (err, client) =>
+		mongodbClient.connect(FamilyHealthHistoryServer.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) =>
 		{
 			if (err)
 			{
@@ -115,6 +115,7 @@ class FamilyHealthHistoryServer
 	{
 		this.app.post('/login', async (req, res) => this.OnLoginReq(req, res));
 		this.app.post('/create-account', async (req, res) => this.OnCreateAccountReq(req, res));
+		this.app.post('/save-tree', async (req, res) => this.OnSaveTreeReq(req, res));
 		this.app.post('/logout', async (req, res) => this.OnLogoutReq(req, res));
 	}
 
@@ -155,7 +156,10 @@ class FamilyHealthHistoryServer
 		// Cache user's data in session so that we don't have to hit the db on later requests
 		req.session.userData = userData;
 		
-		return res.send({ authenticationStatus: AuthenticationStatus.success });
+		return res.send({ 
+			authenticationStatus: AuthenticationStatus.success,
+			family_nodes: userData.family_nodes,
+		});
 	}
 
 	private async OnCreateAccountReq(req: express.Request, res: express.Response): Promise<express.Response>
@@ -178,6 +182,29 @@ class FamilyHealthHistoryServer
 		}
 
 		return res.send({ authenticationStatus: AuthenticationStatus.success });
+	}
+
+	private async OnSaveTreeReq(req: express.Request, res: express.Response): Promise<express.Response>
+	{
+		if (!req.session || !req.session.key)
+			return res.status(500).send();
+
+		try 
+		{
+			await this.loginDataDb.updateOne({ 
+				_id: req.session.key.toLowerCase(),
+			}, { 
+				$set: { family_nodes: req.body.family_nodes }
+			});
+		}
+		catch (err)
+		{
+			console.error('Error attempting to save family tree:');
+			console.error(err);
+			return res.status(500).send();
+		}
+
+		return res.send();
 	}
 
 	private async OnLogoutReq(req: express.Request, res: express.Response): Promise<express.Response>
